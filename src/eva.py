@@ -38,7 +38,7 @@ def evaluate_only():
     device = torch.device('cpu')
     
     # Path settings
-    model_path = "../trained_models/base/airl_CV0_size10000.pt"  # Adjust as necessary
+    model_path = "../trained_models/state_reward/airl_CV0_size10000.pt"  # Adjust as necessary
     edge_p = "../data/base/edge.txt"
     network_p = "../data/base/transit.npy"
     path_feature_p = "../data/base/feature_od.npy"

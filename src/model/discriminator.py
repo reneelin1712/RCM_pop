@@ -23,7 +23,8 @@ class DiscriminatorAIRLCNN(nn.Module):
         self.conv1 = nn.Conv2d(rs_input_dim, 20, 3, padding=1)  # [batch, 20, 3, 3]
         self.pool = nn.MaxPool2d(2, 1)  # [batch, 20, 3, 3]
         self.conv2 = nn.Conv2d(20, 30, 2)  # [batch, 30, 1, 1]
-        self.fc1 = nn.Linear(30 + self.action_num, 120)  # [batch, 120]
+        # self.fc1 = nn.Linear(30 + self.action_num, 120)  # [batch, 120]
+        self.fc1 = nn.Linear(30, 120)  # Changed from 30 + self.action_num to 30
         self.fc2 = nn.Linear(120, 84)  # [batch, 84]
         self.fc3 = nn.Linear(84, 1)  # [batch, 8]
 
@@ -58,16 +59,14 @@ class DiscriminatorAIRLCNN(nn.Module):
         feature = torch.cat([path_feature, edge_feature], -1)  # [batch_size, n_path_feature + n_edge_feature]
         return feature
 
-    def f(self, state, des, act, next_state):
+    def f(self, state, des, next_state):
         """rs"""
         x = self.process_neigh_features(state, des)
         x = self.pool(F.leaky_relu(self.conv1(x), 0.2))
         x = F.leaky_relu(self.conv2(x), 0.2)
-        x = x.view(-1, 30)  # 到这一步等于是对这个3x3的图提取feature
-        x_act = F.one_hot(act, num_classes=self.action_num)
-        x = torch.cat([x, x_act], 1)  # [batch_size, 38]
+        x = x.view(-1, 30)
         x = F.leaky_relu(self.fc1(x), 0.2)
-        x = F.leaky_relu(self.fc2(x), 0.2)  # 我个人的建议是你先把它按照图像处理完
+        x = F.leaky_relu(self.fc2(x), 0.2)
         rs = self.fc3(x)
 
         """hs"""
@@ -84,13 +83,13 @@ class DiscriminatorAIRLCNN(nn.Module):
 
         return rs + self.gamma * next_x_state - x_state
 
-    def forward(self, states, des, act, log_pis, next_states):
+    def forward(self, states, des, log_pis, next_states):
         # Discriminator's output is sigmoid(f - log_pi).
-        return self.f(states, des, act, next_states) - log_pis
+        return self.f(states, des, next_states) - log_pis
 
-    def calculate_reward(self, states, des, act, log_pis, next_states):
+    def calculate_reward(self, states, des, log_pis, next_states):
         with torch.no_grad():
-            logits = self.forward(states, des, act, log_pis, next_states)
+            logits = self.forward(states, des, log_pis, next_states)
             return -F.logsigmoid(-logits)
 
 
