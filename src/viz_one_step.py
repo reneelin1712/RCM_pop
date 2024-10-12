@@ -11,6 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 # Compute attributions
 from captum.attr import IntegratedGradients, Saliency
+from captum.attr import FeatureAblation
 
 
 def load_model(model_path, device, env, path_feature_pad, edge_feature_pad):
@@ -56,6 +57,33 @@ def get_cnn_input(policy_net, state, des,device):
     return input_data
 
 def interpret_model():
+
+    # Feature names (as per your earlier code)
+    feature_names = [
+        'temp',
+        'Number of links',                # 0
+        'Total length',                   # 1
+        'Number of left turns',           # 2
+        'Number of right turns',          # 3
+        'Number of U-turns',              # 4
+        'Number of residential roads',    # 5
+        'Number of primary roads',        # 6
+        'Number of unclassified roads',   # 7
+        'Number of tertiary roads',       # 8
+        'Number of living_street roads',  # 9
+        'Number of secondary roads',      #10
+        'Mask feature',                   #11
+        'Edge length',                    #12
+        'Highway type: residential',      #13
+        'Highway type: primary',          #14
+        'Highway type: unclassified',     #15
+        'Highway type: tertiary',         #16
+        'Highway type: living_street',    #17
+        'Highway type: secondary',        #18
+        'Edge ratio',                      #19
+     
+    ]
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Path settings
@@ -123,15 +151,80 @@ def interpret_model():
     saliency = Saliency(forward_func)
     attributions_saliency = saliency.attribute(input_data, target=predicted_action)
 
-
-
     # Convert attributions to numpy arrays and remove the batch dimension
     attr_ig = attributions_ig.squeeze().cpu().detach().numpy()
     attr_saliency = attributions_saliency.squeeze().cpu().detach().numpy()
 
+    # Aggregate attributions for each channel
+    channel_importance = np.sum(np.abs(attr_ig), axis=(1, 2))
+    print('attr_ig.shape:', attr_ig.shape)  # Should be (num_channels, height, width)
+    print('Number of channels in attr_ig:', attr_ig.shape[0])
+    print('len(feature_names):', len(feature_names))  # Should be 20
+
+
+    # Rank features
+    ranked_indices = np.argsort(-channel_importance)
+    sorted_importance = channel_importance[ranked_indices]
+    ranked_features = [feature_names[i] for i in ranked_indices]
+
+    # Create DataFrame
+    feature_importance_df = pd.DataFrame({
+        'Feature': ranked_features,
+        'Importance Score': sorted_importance
+    })
+
+    print(feature_importance_df)
+
+    # Feature Ablation
+    feature_ablation = FeatureAblation(forward_func)
+    attributions_ablation = feature_ablation.attribute(input_data, target=predicted_action)
+    attr_ablation = attributions_ablation.squeeze().cpu().detach().numpy()
+
+    # Aggregate attributions for each channel (Feature Ablation)
+    channel_importance_ablation = np.sum(np.abs(attr_ablation), axis=(1, 2))
+
+    # Rank features (Feature Ablation)
+    ranked_indices_ablation = np.argsort(-channel_importance_ablation)
+    sorted_importance_ablation = channel_importance_ablation[ranked_indices_ablation]
+    ranked_features_ablation = [feature_names[i] for i in ranked_indices_ablation]
+
+    # Create DataFrame (Feature Ablation)
+    feature_importance_ablation_df = pd.DataFrame({
+        'Feature': ranked_features_ablation,
+        'Importance Score': sorted_importance_ablation
+    })
+    print("Feature Importance from Feature Ablation:")
+    print(feature_importance_ablation_df)
+
+
+
+    # Visualize Feature Importance
+    plt.figure(figsize=(10, 6))
+    plt.barh(ranked_features[::-1], sorted_importance[::-1])
+    plt.xlabel('Importance Score')
+    plt.title('Feature Importance Ranking')
+    plt.tight_layout()
+    plt.show()
+
+    # Visualize Feature Importance (Feature Ablation)
+    plt.figure(figsize=(10, 6))
+    plt.barh(ranked_features_ablation[::-1], sorted_importance_ablation[::-1])
+    plt.xlabel('Importance Score')
+    plt.title('Feature Importance Ranking (Feature Ablation)')
+    plt.tight_layout()
+    plt.show()
+
     # Sum over the channels to get a single 2D map
     attr_ig_sum = np.sum(attr_ig, axis=0)
     attr_saliency_sum = np.sum(attr_saliency, axis=0)
+    attr_ablation_sum = np.sum(attr_ablation, axis=0)
+
+    # Plot the Integrated Gradients attribution map
+    plt.figure(figsize=(6, 4))
+    plt.imshow(attr_ig_sum, cmap='hot')
+    plt.title('Integrated Gradients Attribution Map')
+    plt.colorbar()
+    plt.show()
 
     # Plot the Integrated Gradients attribution
     plt.figure(figsize=(6, 4))
@@ -144,6 +237,13 @@ def interpret_model():
     plt.figure(figsize=(6, 4))
     plt.imshow(attr_saliency_sum, cmap='hot')
     plt.title('Saliency Attribution')
+    plt.colorbar()
+    plt.show()
+
+    # Plot the Feature Ablation attribution map
+    plt.figure(figsize=(6, 4))
+    plt.imshow(attr_ablation_sum, cmap='hot')
+    plt.title('Feature Ablation Attribution Map')
     plt.colorbar()
     plt.show()
 

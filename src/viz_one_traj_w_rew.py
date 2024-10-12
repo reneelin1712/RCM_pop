@@ -9,6 +9,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from captum.attr import IntegratedGradients, Saliency
 import torch.nn.functional as F
+import json
+import os
 
 def load_model(model_path, device, env, path_feature_pad, edge_feature_pad):
     gamma = 0.99  # discount factor
@@ -155,6 +157,7 @@ def interpret_model():
         attributions_ig_list.append(attributions_ig.squeeze().cpu().detach().numpy())
         attributions_saliency_list.append(attributions_saliency.squeeze().cpu().detach().numpy())
 
+
         # Now compute attributions for the discriminator network
 
         # Prepare inputs for discriminator
@@ -246,6 +249,7 @@ def interpret_model():
         # Modify the titles to include the action
         plt.title(f'Policy Network IG Attribution - Step {idx+1} - Action {action}')
         plt.colorbar()
+        plt.savefig(os.path.join('output_img', f'ig_heatmap_step_{idx+1}.png'))
         plt.show()
 
         # Plot the Saliency attribution for policy network

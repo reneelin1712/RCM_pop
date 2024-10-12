@@ -1,0 +1,22 @@
+Feature,Importance Score
+Highway type: living_street,0.8398386073722021
+Highway type: residential,0.6868079525209467
+Highway type: primary,0.5657762218108807
+Total length,0.5033515526563952
+Number of left turns,0.46217645509915595
+Number of living_street roads,0.4503961351143595
+Number of U-turns,0.39822598270532195
+Edge length,0.3747951576705899
+Number of tertiary roads,0.3744302566562101
+Highway type: unclassified,0.3596734085790152
+Highway type: secondary,0.29744192054177293
+Edge ratio,0.2827234180270196
+temp,0.2730563998461915
+Number of secondary roads,0.26718738446296253
+Number of unclassified roads,0.2280035060846769
+Number of residential roads,0.19937593400045128
+Number of links,0.19043508584618973
+Number of right turns,0.1390337093110395
+Highway type: tertiary,0.11537522849702955
+Number of primary roads,0.09912969653136934
+Mask feature,0.049041526632611826
