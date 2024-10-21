@@ -7,6 +7,11 @@ import numpy as np
 class PolicyCNN(nn.Module):
     def __init__(self, action_num, policy_mask, action_state, path_feature, link_feature, input_dim, pad_idx=None):
         super(PolicyCNN, self).__init__()
+
+        # print('Path Feature Dimension:', path_feature.shape[-1])        # Should print 11 or updated value
+        # print('Edge Feature Dimension:', link_feature.shape[-1])        # Should print 8 if Edge ratio is added
+        # print('Input Dimension (input_dim):', input_dim)   
+
         self.policy_mask = torch.from_numpy(policy_mask).long()
         policy_mask_pad = np.concatenate([policy_mask, np.zeros((policy_mask.shape[0], 1), dtype=np.int32)], 1)
         self.policy_mask_pad = torch.from_numpy(policy_mask_pad).long()
@@ -42,6 +47,13 @@ class PolicyCNN(nn.Module):
         neigh_feature = neigh_feature[:, self.new_index, :]
         x = neigh_feature.view(state.size(0), 3, 3, -1)
         x = x.permute(0, 3, 1, 2)
+
+        # print('neigh_path_feature.shape:', neigh_path_feature.shape)    # [batch_size, action_num + 1, path_feature_dim]
+        # print('neigh_edge_feature.shape:', neigh_edge_feature.shape)    # [batch_size, action_num + 1, edge_feature_dim]
+        # print('neigh_mask_feature.shape:', neigh_mask_feature.shape)    # [batch_size, action_num + 1, 1]
+        # print('Total feature dimension before concatenation:', neigh_path_feature.shape[-1] + neigh_edge_feature.shape[-1] + neigh_mask_feature.shape[-1])
+        # print('neigh_feature.shape after concatenation:', neigh_feature.shape)  # [batch_size, action_num + 1, input_dim]
+        
         return x
 
     def forward(self, x):

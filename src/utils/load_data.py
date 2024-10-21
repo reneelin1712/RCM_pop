@@ -17,6 +17,8 @@ def ini_od_dist(train_path):
 def load_path_feature(path_feature_path):
     # 这样子等于多一个mask 就是走这条路你到不了那个地方
     path_feature = np.load(path_feature_path)
+    print('Loaded path_feature shape:', path_feature.shape)
+    
     path_feature_flat = path_feature.reshape(-1, path_feature.shape[2])
     path_feature_max, path_feature_min = np.max(path_feature_flat, 0), np.min(path_feature_flat, 0)
     print('path_feature', path_feature.shape)

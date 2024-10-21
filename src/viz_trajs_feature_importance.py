@@ -72,7 +72,6 @@ def interpret_model():
 
     # Feature names (ensure this matches the number of channels in your input data)
     feature_names = [
-        'temp',
         # Path features (12 features)
         'Number of links',                # 0
         'Total length',                   # 1
@@ -94,7 +93,8 @@ def interpret_model():
         'Highway type: tertiary',         #16
         'Highway type: living_street',    #17
         'Highway type: secondary',        #18
-        'Edge ratio'                      #19
+        'Edge ratio',                      #19
+        'neighbor mask'
     ]
 
     # Path settings (adjust paths as necessary)

@@ -60,7 +60,6 @@ def interpret_model():
 
     # Feature names (as per your earlier code)
     feature_names = [
-        'temp',
         'Number of links',                # 0
         'Total length',                   # 1
         'Number of left turns',           # 2
@@ -81,6 +80,7 @@ def interpret_model():
         'Highway type: living_street',    #17
         'Highway type: secondary',        #18
         'Edge ratio',                      #19
+        'neighbor mask'
      
     ]
 
