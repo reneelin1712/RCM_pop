@@ -3,4 +3,10 @@ __pycache__/
 .DS_Store
 ._*
 
+rcmenv
+
+src/attributions
+
+src/output_img
+
 
