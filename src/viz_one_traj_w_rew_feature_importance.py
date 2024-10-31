@@ -131,8 +131,15 @@ def interpret_model():
         model_path, device, env, path_feature_pad, edge_feature_pad
     )
 
-    # Load test trajectories
-    test_trajs, test_od = load_test_traj(test_p)
+    # # Load test trajectories
+    # test_trajs, test_od = load_test_traj(test_p)
+    
+    # Manually set the trajectory
+    manual_traj_str = "124_11_125_127_61_325_28_367_286_312_48_316_317_324_341_342_71_345_282_78_231"
+    manual_traj = manual_traj_str.split('_')  # This will create a list of node IDs as strings
+    # Replace test_trajs with the manual trajectory
+    test_trajs = [manual_traj]
+
 
     # Prepare input data
     states_list, destination = prepare_input_data(env, test_trajs)
