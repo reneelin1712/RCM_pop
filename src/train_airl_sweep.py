@@ -129,10 +129,11 @@ def load_model(model_path):
     print("Discriminator Model loaded Successfully")
 
 def main_loop():
-    global best_edit, start_time, log_interval, max_iter_num
+    global best_edit, start_time, log_interval, max_iter_num, min_batch_size
+    global agent, device, discrim_net, policy_net, test_od, test_trajs, model_p
+
 
     best_edit = 1.0
-
     for i_iter in range(1, max_iter_num + 1):
         """Generate multiple trajectories that reach the minimum batch_size"""
         discrim_net.to(torch.device('cpu'))
@@ -178,6 +179,51 @@ def main_loop():
                 'seed': wandb.config.seed,
                 # Add other hyperparameters if needed
             })
+    # for i_iter in range(1, max_iter_num + 1):
+    #     """Generate multiple trajectories that reach the minimum batch_size"""
+    #     discrim_net.to(torch.device('cpu'))
+    #     discrim_net.to_device(torch.device('cpu'))
+    #     batch, _ = agent.collect_samples(min_batch_size, mean_action=False)
+    #     discrim_net.to(device)
+    #     discrim_net.to_device(device)
+
+    #     discrim_loss, value_loss, policy_loss = update_params_airl(batch, i_iter)
+    #     if i_iter % log_interval == 0:
+    #         elapsed_time = time.time() - start_time
+    #         print(f"Iteration {i_iter}/{max_iter_num} | Elapsed Time: {elapsed_time:.2f}s")
+    #         print(f"Discriminator Loss: {discrim_loss:.4f} | Value Loss: {value_loss:.4f} | Policy Loss: {policy_loss:.4f}")
+
+    #         learner_trajs = agent.collect_routes_with_OD(test_od, mean_action=True)
+    #         edit_dist = evaluate_train_edit_dist(test_trajs, learner_trajs)
+    #         print(f"Edit Distance: {edit_dist:.4f} | Best Edit Distance: {best_edit:.4f}")
+
+    #         if edit_dist < best_edit:
+    #             best_edit = edit_dist
+    #             save_model(model_p)
+    #             print("Model saved.")
+
+    #         print("---")
+
+    #         # Log metrics to W&B
+    #         wandb.log({
+    #             'Iteration': i_iter,
+    #             'Elapsed Time': elapsed_time,
+    #             'Discriminator Loss': discrim_loss,
+    #             'Value Loss': value_loss,
+    #             'Policy Loss': policy_loss,
+    #             'Edit Distance': edit_dist,
+    #             'Best Edit Distance': best_edit,
+    #             # Log hyperparameters
+    #             'learning_rate': wandb.config.learning_rate,
+    #             'gamma': wandb.config.gamma,
+    #             'tau': wandb.config.tau,
+    #             'l2_reg': wandb.config.l2_reg,
+    #             'clip_epsilon': wandb.config.clip_epsilon,
+    #             'optim_epochs': wandb.config.optim_epochs,
+    #             'optim_batch_size': wandb.config.optim_batch_size,
+    #             'seed': wandb.config.seed,
+    #             # Add other hyperparameters if needed
+    #         })
 
 def hard_update(target, source):
     """
@@ -190,7 +236,7 @@ def hard_update(target, source):
         target_param.data.copy_(param.data)
 
 def train():
-    wandb.init(project='RCM-pop', entity='reneelin2024')
+    wandb.init(project='RCM-pop', entity='reneelin2024',resume='allow')
     config = wandb.config
 
     global policy_net, value_net, discrim_net
@@ -198,6 +244,7 @@ def train():
     global env, device, expert_st, expert_des, expert_ac, expert_next_st
     global agent, test_od, test_trajs, model_p
     global max_iter_num, log_interval, start_time, best_edit
+    global min_batch_size  # Add min_batch_size to globals
 
     # Hyperparameters
     log_std = -0.0  # This might stay constant
