@@ -18,6 +18,7 @@ from utils.load_data import ini_od_dist, load_path_feature, load_link_feature, \
 
 import csv
 import pandas as pd
+import wandb
 
 torch.backends.cudnn.enabled = False
 
@@ -173,6 +174,8 @@ def hard_update(target, source):
 
 
 if __name__ == '__main__':
+    wandb.init(project='RCM-pop', name='AIRL',entity="reneelin2024")
+
     log_std = -0.0  # log std for the policy
     gamma = 0.99  # discount factor
     tau = 0.95  # gae
