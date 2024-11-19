@@ -8,7 +8,14 @@ rcmenv
 src/attributions
 
 src/output_img
+src/output_img_20241106
+src/output_img_ed005
 
 src/wandb
+
+/src/output_img_*
+
+
+*.csv
 
 

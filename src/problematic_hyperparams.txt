@@ -1,0 +1,1 @@
+Exception during training with hyperparameters: {'clip_epsilon': 0.2, 'cv': 0, 'epoch_disc': 1, 'gamma': 0.99, 'l2_reg': 0.0001, 'learning_rate': 0.00027636546134161035, 'log_interval': 50, 'max_grad_norm': 5, 'max_iter_num': 1000, 'min_batch_size': 4096, 'num_threads': 4, 'optim_batch_size': 32, 'optim_epochs': 30, 'seed': 100, 'size': 10000, 'tau': 0.9}
